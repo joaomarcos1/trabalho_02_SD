@@ -1,0 +1,37 @@
+create database sd;
+
+show databases;
+
+use sd;
+
+show tables;
+create table usuarios (id_usuario int not null primary key auto_increment, nome varchar(40), cpf varchar(16) not null unique, sexo varchar(14));
+
+
+drop table usuarios;
+
+select * from usuarios;
+
+
+
+describe usuarios;
+
+insert into usuarios (nome, cpf, sexo) values ("Pedro Francisco", "063456757887", "Masculino");
+create table imc_usuarios (id_usuario int, imc float, constraint fk_usuarioImc foreign key (id_usuario) references usuarios (id_usuario));
+
+insert into imc_usuarios(id_usuario, imc) values (7, 26.67);
+
+select * from imc_usuarios;
+
+show tables;
+
+drop table imc_usuarios;
+
+describe imc_usuarios;
+
+select * from imc_usuarios;
+
+select * from usuarios where nome = "Luís Silva";
+
+
+select nome from usuarios where id_usuario = 6;

@@ -1,0 +1,5 @@
+Funcões servidor
+
+validação cpf
+buscar perda de gordura do usuaŕio que faz o cálculo do IMC
+
