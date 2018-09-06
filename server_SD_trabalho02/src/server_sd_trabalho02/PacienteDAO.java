@@ -8,8 +8,8 @@ package server_sd_trabalho02;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import server_sd_trabalho02.Paciente;
-import server_sd_trabalho02.MakeConnection;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
@@ -18,38 +18,41 @@ import server_sd_trabalho02.MakeConnection;
 public class PacienteDAO {
     
     private PreparedStatement pstatement;
+    ResultSet resultado;
     
-    private boolean  retorno;
-    private String   sql;
-    private Paciente paciente;
+    private String       sql;
+    private Paciente     paciente;
+    private List<Double> listaImc;
     
     public boolean cadastraPaciente(Paciente paciente){
-        sql = "INSERT INTO usuario(nome, cpf, idade, peso, altura) VALUES(?, ?, ?, ?, ?)";
+        sql = "INSERT INTO usuarios(nome, cpf, idade, peso, altura) VALUES(?, ?, ?, ?, ?)";
         
         pstatement = MakeConnection.getPreparedStatement(sql);
         
         try{
             pstatement.setString(1, paciente.getNome());
             pstatement.setString(2, paciente.getCpf());
-            pstatement.setString(3, paciente.getSexo());
+            pstatement.setInt   (3, paciente.getIdade());
+            pstatement.setDouble(4, paciente.getPeso());
+            pstatement.setDouble(5, paciente.getAltura());
             
-            retorno = true;
+            return true;
         }catch(Exception error){
             System.out.println("Erro de cadastro: " + error.getMessage());
-            retorno = false;
+            
+            return false;
         }
         
-        return retorno;
     }
     
-    public Paciente buscaPaciente(String nome){
-        sql = "SELECT * FROM usuario where nome="+nome;
+    public Paciente buscaPaciente(String cpf){
+        sql = "SELECT * FROM usuarios WHERE cpf=?";
         
         pstatement = MakeConnection.getPreparedStatement(sql);
         
         try{
-            pstatement.setString(1, nome);
-            ResultSet resultado = pstatement.executeQuery();
+            pstatement.setString(1, cpf);
+            resultado = pstatement.executeQuery();
             
             if(resultado.next()){
                 paciente = new Paciente();
@@ -57,7 +60,9 @@ public class PacienteDAO {
                 paciente.setId    (resultado.getInt   ("id"));
                 paciente.setNome  (resultado.getString("nome"));
                 paciente.setCpf   (resultado.getString("cpf"));
-                paciente.setSexo    (resultado.getString(""));
+                paciente.setIdade (resultado.getInt   ("idade"));
+                paciente.setPeso  (resultado.getDouble("peso"));
+                paciente.setAltura(resultado.getDouble("altura"));
             }else{
                 paciente = null;
             }
@@ -67,6 +72,54 @@ public class PacienteDAO {
         }
         
         return paciente;
+    }
+    
+    public boolean cadastraImc(String cpf, double imc){
+        
+        paciente = new Paciente();
+        paciente = buscaPaciente(cpf);
+        
+        sql = "INSERT INTO imc_usuarios(id_usuario, imc) VALUES(?, ?)";
+        
+        pstatement = MakeConnection.getPreparedStatement(sql);
+        
+        try{
+            pstatement.setInt(1, paciente.getId());
+            pstatement.setDouble(2, imc);
+            
+            return true;
+        }catch(Exception error){
+            System.out.println("Erro de cadastro: " + error.getMessage());
+            
+            return false;
+        }
+        
+    }
+    
+    public List<Double> buscaImc(String cpf){
+        paciente = new Paciente();
+        paciente = buscaPaciente(cpf);
+        
+        listaImc = new ArrayList<>();
+        
+        sql = "SELECT imc FROM imc_usuarios WHERE id_usuario=?";
+        
+        pstatement = MakeConnection.getPreparedStatement(sql);
+        
+        try{
+            pstatement.setInt(0, paciente.getId());
+            resultado = pstatement.executeQuery();
+            
+            while(resultado.next()){
+                listaImc.add(resultado.getDouble("imc"));
+            }
+            
+            return listaImc;
+        }catch(SQLException erro){
+            System.out.println("Erro de sql: " + erro.getMessage());
+            
+            return listaImc;
+        }
     }
     
 }
